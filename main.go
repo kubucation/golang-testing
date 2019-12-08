@@ -11,8 +11,8 @@ func main() {
 }
 
 func converter(input string) (string, error) {
-	if len(input) == 7 {
-		return "", fmt.Errorf("input length is seven which is forbidden")
+	if len(input) == 8 {
+		return "", fmt.Errorf("input length is eight which is forbidden")
 	}
 
 	splitter := func(c rune) bool {
