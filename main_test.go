@@ -5,30 +5,57 @@ import (
 	"testing"
 )
 
-func TestConverter_HappyPath(t *testing.T) {
-	input := "this is a sample string"
-	expectedOutput := "this_is_a_sample_string"
-
-	actual, err := converter(input)
-	if err != nil {
-		t.Errorf("expected no error, but got %v", err)
-	}
-
-	if actual != expectedOutput {
-		t.Errorf("expected output to be %s, but got %s", expectedOutput, actual)
-	}
-}
-
 func TestConverter_ErrorPath(t *testing.T) {
-	input := "12345678"
-	expectedErr := fmt.Errorf("input length is eight which is forbidden")
-
-	_, err := converter(input)
-	if err == nil {
-		t.Fatal("expected error not be nil, but was nil")
+	type test struct {
+		name           string
+		input          string
+		expectedOutput string
+		expectedErr    error
 	}
 
-	if err.Error() != expectedErr.Error() {
-		t.Errorf("expected error to be %v, but got %v", expectedErr, err)
+	tests := []test{
+		test{
+			name:           "simple input",
+			input:          "this is a sample string",
+			expectedOutput: "this_is_a_sample_string",
+			expectedErr:    nil,
+		},
+		test{
+			name:           "complex input with special characters",
+			input:          "this@#$@#$is a complex!!!!string...",
+			expectedOutput: "this_is_a_complex_string",
+			expectedErr:    nil,
+		},
+		test{
+			name:        "unhappy path, invalid length",
+			input:       "12345678",
+			expectedErr: fmt.Errorf("input length is eight which is forbidden"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			actual, err := converter(test.input)
+
+			if test.expectedErr != nil {
+				if err == nil {
+					t.Fatalf("expected an error, but got nil")
+				}
+
+				if test.expectedErr.Error() != err.Error() {
+					t.Fatalf("expected err to be %s, but got %s", test.expectedErr, err)
+				}
+
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("expected no error, but got %s", err)
+			}
+
+			if test.expectedOutput != actual {
+				t.Errorf("expected output to be %s, but got %s", test.expectedOutput, actual)
+			}
+		})
 	}
 }
